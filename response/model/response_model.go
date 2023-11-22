@@ -5,7 +5,7 @@ type Status struct {
 	Header      string `json:"header"  binding:"required"`
 	Description string `json:"description"  binding:"required"`
 }
-type ResponseModel struct {
-	Status Status      `json:"status"  binding:"required"`
-	Data   interface{} `json:"data"  binding:"required"`
+type ResponseModel[T interface{}] struct {
+	Status Status `json:"status"  binding:"required"`
+	Data   T      `json:"data"  binding:"required"`
 }

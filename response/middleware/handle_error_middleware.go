@@ -12,12 +12,14 @@ import (
 
 func HandleErrorMiddleware(ctx *fiber.Ctx, err error) error {
 	l := logger.Get(ctx)
+
 	l.Error(err.Error())
 	l.LogResponse()
+
 	var e *fiber.Error
 	if errors.As(err, &e) {
 		if e.Code > 1000 {
-			resp := model.ResponseModel{
+			resp := model.ResponseModel[interface{}]{
 				Status: response.GetResponseStatus(ctx, (e.Code)),
 			}
 			return ctx.Status(fiber.StatusUnprocessableEntity).JSON(resp)

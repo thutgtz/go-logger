@@ -33,7 +33,7 @@ func (c *CustomResponseImpl) getResponseStatus(ctx *fiber.Ctx, code int) model.S
 }
 
 func (c *CustomResponseImpl) success(ctx *fiber.Ctx, data interface{}, code int) error {
-	resp := model.ResponseModel{
+	resp := model.ResponseModel[interface{}]{
 		Status: c.getResponseStatus(ctx, code),
 		Data:   data,
 	}
