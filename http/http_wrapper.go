@@ -3,10 +3,13 @@ package http
 import (
 	"bytes"
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"time"
 
 	"github.com/thutgtz/go-logger/logger"
+	"github.com/thutgtz/go-logger/logger/constant"
+	"github.com/thutgtz/go-logger/logger/model"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -29,10 +32,7 @@ func NewHttpWrapper(baseUrl string) HttpWrapper {
 func (h *httpWrapperImpl) httpRequest(method string, ctx *fiber.Ctx, path string, header map[string]string, body []byte, timeOutInSecond time.Duration) (map[string]interface{}, error) {
 	l := logger.Get(ctx)
 	l.Info(path)
-	// log := model.RequestLogModel{
 
-	// }
-	// l.LogExternalApi()
 	defaultTimeout := time.Duration(timeOutInSecond * time.Second)
 	client := &http.Client{
 		Timeout: defaultTimeout,
@@ -44,9 +44,13 @@ func (h *httpWrapperImpl) httpRequest(method string, ctx *fiber.Ctx, path string
 		return nil, errReq
 	}
 
+	reqTime := time.Now()
 	response, errResp := client.Do(request)
-	if errResp != nil {
+	logInfo := h.logResponseInfo(ctx, reqTime, method, path, h.baseUrl+path, header, body, response)
 
+	l.LogApi(logInfo)
+
+	if errResp != nil {
 		return nil, errResp
 	}
 	defer response.Body.Close()
@@ -55,6 +59,44 @@ func (h *httpWrapperImpl) httpRequest(method string, ctx *fiber.Ctx, path string
 	json.NewDecoder(response.Body).Decode(&result)
 
 	return result, nil
+}
+
+func (h *httpWrapperImpl) logResponseInfo(
+	ctx *fiber.Ctx,
+	reqTime time.Time,
+	medthod string,
+	path string,
+	rawUri string,
+	header map[string]string,
+	body []byte,
+	resp *http.Response,
+) model.RequestLogModel {
+	userId := ctx.GetRespHeader(string(constant.USER_ID))
+	correlationId := ctx.GetRespHeader(string(constant.CORRELATION_ID))
+
+	responseModel := model.ResponseModel{}
+	json.Unmarshal(body, &responseModel)
+	headerBytes, _ := json.Marshal(header)
+	execTime := time.Now().Sub(reqTime).Milliseconds()
+
+	log := model.RequestLogModel{
+		LogType:        constant.REQUEST_LOG,
+		IpAddress:      ctx.IP(),
+		CorrelationId:  correlationId,
+		UserId:         userId,
+		Method:         medthod,
+		Uri:            path,
+		RawUri:         rawUri,
+		ReqHeader:      string(headerBytes),
+		ReqBody:        string(body),
+		ReqTime:        reqTime.Format(time.RFC3339),
+		RespBody:       string(body),
+		RespHttpStatus: resp.Status,
+		RespStatus:     fmt.Sprint(responseModel.Status.Code),
+		ExecTime:       fmt.Sprint(execTime),
+	}
+
+	return log
 }
 
 func (h *httpWrapperImpl) Get(ctx *fiber.Ctx, path string, header map[string]string, timeOutInSecond time.Duration) (map[string]interface{}, error) {

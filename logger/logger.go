@@ -13,7 +13,7 @@ import (
 )
 
 type Logger interface {
-	LogExternalApi(logReq model.RequestLogModel)
+	LogApi(logReq model.RequestLogModel)
 	LogResponse()
 	Info(message string)
 	Error(message string)
@@ -46,9 +46,9 @@ func newLoggerImpl(ctx *fiber.Ctx) Logger {
 	}
 }
 
-func (l *LoggerImpl) LogExternalApi(logReq model.RequestLogModel) {
+func (l *LoggerImpl) LogApi(logReq model.RequestLogModel) {
 	info(
-		"request",
+		"api-log",
 		convertStructToLogField[model.RequestLogModel](logReq)...,
 	)
 }
@@ -79,10 +79,7 @@ func (l *LoggerImpl) LogResponse() {
 		ExecTime:       fmt.Sprint(execTime),
 	}
 
-	info(
-		"response",
-		convertStructToLogField[model.RequestLogModel](respLog)...,
-	)
+	l.LogApi(respLog)
 }
 
 func (l *LoggerImpl) ApiLogMetaData() model.ApiLogModel {
