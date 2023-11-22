@@ -9,11 +9,12 @@ import (
 
 	"github.com/gofiber/fiber/v2"
 
-	"github.com/thutgtz/go-logger/logger/model"
+	loggerModel "github.com/thutgtz/go-logger/logger/model"
+	"github.com/thutgtz/go-logger/response/model"
 )
 
 type Logger interface {
-	LogApi(logReq model.RequestLogModel)
+	LogApi(logReq loggerModel.RequestLogModel)
 	LogResponse()
 	Info(message string)
 	Error(message string)
@@ -46,10 +47,10 @@ func newLoggerImpl(ctx *fiber.Ctx) Logger {
 	}
 }
 
-func (l *LoggerImpl) LogApi(logReq model.RequestLogModel) {
+func (l *LoggerImpl) LogApi(logReq loggerModel.RequestLogModel) {
 	info(
 		"api-log",
-		convertStructToLogField[model.RequestLogModel](logReq)...,
+		convertStructToLogField[loggerModel.RequestLogModel](logReq)...,
 	)
 }
 
@@ -57,12 +58,12 @@ func (l *LoggerImpl) LogResponse() {
 	userId := l.ctx.Request().Header.Peek(string(constant.USER_ID))
 	correlationId := l.ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
 
-	resp := model.ResponseModel{}
+	resp := model.ResponseModel[interface{}]{}
 	json.Unmarshal(l.ctx.Response().Body(), &resp)
 
 	reqTime := l.ctx.Context().UserValue(REQ_TIME).(time.Time)
 	execTime := time.Now().Sub(reqTime).Milliseconds()
-	respLog := model.RequestLogModel{
+	respLog := loggerModel.RequestLogModel{
 		LogType:        constant.REQUEST_LOG,
 		IpAddress:      l.ctx.IP(),
 		CorrelationId:  string(correlationId),
@@ -82,11 +83,11 @@ func (l *LoggerImpl) LogResponse() {
 	l.LogApi(respLog)
 }
 
-func (l *LoggerImpl) ApiLogMetaData() model.ApiLogModel {
+func (l *LoggerImpl) ApiLogMetaData() loggerModel.ApiLogModel {
 	userId := l.ctx.Request().Header.Peek(string(constant.USER_ID))
 	correlationId := l.ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
 
-	return model.ApiLogModel{
+	return loggerModel.ApiLogModel{
 		LogType:       constant.API_LOG,
 		IpAddress:     l.ctx.IP(),
 		CorrelationId: string(correlationId),
@@ -97,20 +98,20 @@ func (l *LoggerImpl) ApiLogMetaData() model.ApiLogModel {
 func (l *LoggerImpl) Info(message string) {
 	info(
 		message,
-		convertStructToLogField[model.ApiLogModel](l.ApiLogMetaData())...,
+		convertStructToLogField[loggerModel.ApiLogModel](l.ApiLogMetaData())...,
 	)
 }
 
 func (l *LoggerImpl) Debug(message string) {
 	debug(
 		message,
-		convertStructToLogField[model.ApiLogModel](l.ApiLogMetaData())...,
+		convertStructToLogField[loggerModel.ApiLogModel](l.ApiLogMetaData())...,
 	)
 }
 
 func (l *LoggerImpl) Error(message string) {
 	errors(
 		message,
-		convertStructToLogField[model.ApiLogModel](l.ApiLogMetaData())...,
+		convertStructToLogField[loggerModel.ApiLogModel](l.ApiLogMetaData())...,
 	)
 }

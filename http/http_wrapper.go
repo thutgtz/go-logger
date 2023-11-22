@@ -10,6 +10,7 @@ import (
 	"github.com/thutgtz/go-logger/logger"
 	"github.com/thutgtz/go-logger/logger/constant"
 	"github.com/thutgtz/go-logger/logger/model"
+	responseModel "github.com/thutgtz/go-logger/response/model"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -74,7 +75,7 @@ func (h *httpWrapperImpl) logResponseInfo(
 	userId := ctx.Request().Header.Peek(string(constant.USER_ID))
 	correlationId := ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
 
-	responseModel := model.ResponseModel{}
+	responseModel := responseModel.ResponseModel[interface{}]{}
 	json.Unmarshal(body, &responseModel)
 	headerBytes, _ := json.Marshal(header)
 	execTime := time.Now().Sub(reqTime).Milliseconds()
