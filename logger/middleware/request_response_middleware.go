@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
@@ -12,11 +11,11 @@ import (
 
 func RequestResponseLogMiddleWare(c *fiber.Ctx) error {
 	logger.Set(c)
-	reqTime := time.Now()
+
 	correlationId := c.GetRespHeader(string(constant.CORRELATION_ID))
 	if correlationId == "" {
-		fmt.Printf("new correlationId : %v\n", correlationId)
 		correlationId = uuid.New().String()
+		fmt.Printf("new correlationId : %v\n", correlationId)
 		c.Request().Header.Add(string(constant.CORRELATION_ID), correlationId)
 	}
 
@@ -24,7 +23,9 @@ func RequestResponseLogMiddleWare(c *fiber.Ctx) error {
 
 	err := c.Next()
 
-	log.LogResponse(reqTime)
+	if err == nil {
+		log.LogResponse()
+	}
 
 	return err
 }

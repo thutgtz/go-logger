@@ -14,18 +14,21 @@ import (
 
 type Logger interface {
 	LogExternalApi(logReq model.RequestLogModel)
-	LogResponse(reqTime time.Time)
+	LogResponse()
 	Info(message string)
 	Error(message string)
 	Debug(message string)
 }
 
 const LOGGER = "LOGGER"
+const REQ_TIME = "REQ_TIME"
 
 func Set(ctx *fiber.Ctx) {
 	logInstance := newLoggerImpl(ctx)
 	context := ctx.Context()
+	reqTime := time.Now()
 	context.SetUserValue(LOGGER, logInstance)
+	context.SetUserValue(REQ_TIME, reqTime)
 }
 
 func Get(ctx *fiber.Ctx) Logger {
@@ -50,13 +53,14 @@ func (l *LoggerImpl) LogExternalApi(logReq model.RequestLogModel) {
 	)
 }
 
-func (l *LoggerImpl) LogResponse(reqTime time.Time) {
+func (l *LoggerImpl) LogResponse() {
 	userId := l.ctx.GetRespHeader(string(constant.USER_ID))
 	correlationId := l.ctx.GetRespHeader(string(constant.CORRELATION_ID))
 
 	resp := model.ResponseModel{}
 	json.Unmarshal(l.ctx.Response().Body(), &resp)
 
+	reqTime := l.ctx.Context().UserValue(REQ_TIME).(time.Time)
 	execTime := time.Now().Sub(reqTime).Milliseconds()
 	respLog := model.RequestLogModel{
 		LogType:        constant.REQUEST_LOG,
