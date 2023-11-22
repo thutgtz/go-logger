@@ -71,8 +71,8 @@ func (h *httpWrapperImpl) logResponseInfo(
 	body []byte,
 	resp *http.Response,
 ) model.RequestLogModel {
-	userId := ctx.GetRespHeader(string(constant.USER_ID))
-	correlationId := ctx.GetRespHeader(string(constant.CORRELATION_ID))
+	userId := ctx.Request().Header.Peek(string(constant.USER_ID))
+	correlationId := ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
 
 	responseModel := model.ResponseModel{}
 	json.Unmarshal(body, &responseModel)
@@ -82,8 +82,8 @@ func (h *httpWrapperImpl) logResponseInfo(
 	log := model.RequestLogModel{
 		LogType:        constant.REQUEST_LOG,
 		IpAddress:      ctx.IP(),
-		CorrelationId:  correlationId,
-		UserId:         userId,
+		CorrelationId:  string(correlationId),
+		UserId:         string(userId),
 		Method:         medthod,
 		Uri:            path,
 		RawUri:         rawUri,

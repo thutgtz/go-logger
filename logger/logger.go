@@ -54,8 +54,8 @@ func (l *LoggerImpl) LogApi(logReq model.RequestLogModel) {
 }
 
 func (l *LoggerImpl) LogResponse() {
-	userId := l.ctx.GetRespHeader(string(constant.USER_ID))
-	correlationId := l.ctx.GetRespHeader(string(constant.CORRELATION_ID))
+	userId := l.ctx.Request().Header.Peek(string(constant.USER_ID))
+	correlationId := l.ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
 
 	resp := model.ResponseModel{}
 	json.Unmarshal(l.ctx.Response().Body(), &resp)
@@ -65,8 +65,8 @@ func (l *LoggerImpl) LogResponse() {
 	respLog := model.RequestLogModel{
 		LogType:        constant.REQUEST_LOG,
 		IpAddress:      l.ctx.IP(),
-		CorrelationId:  correlationId,
-		UserId:         userId,
+		CorrelationId:  string(correlationId),
+		UserId:         string(userId),
 		Method:         l.ctx.Method(),
 		Uri:            l.ctx.Path(),
 		RawUri:         l.ctx.BaseURL() + l.ctx.Path() + l.ctx.Context().QueryArgs().String(),
@@ -83,14 +83,14 @@ func (l *LoggerImpl) LogResponse() {
 }
 
 func (l *LoggerImpl) ApiLogMetaData() model.ApiLogModel {
-	userId := l.ctx.GetRespHeader(string(constant.USER_ID))
-	correlationId := l.ctx.GetRespHeader(string(constant.CORRELATION_ID))
+	userId := l.ctx.Request().Header.Peek(string(constant.USER_ID))
+	correlationId := l.ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
 
 	return model.ApiLogModel{
 		LogType:       constant.API_LOG,
 		IpAddress:     l.ctx.IP(),
-		CorrelationId: correlationId,
-		UserId:        userId,
+		CorrelationId: string(correlationId),
+		UserId:        string(userId),
 	}
 }
 

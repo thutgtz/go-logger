@@ -12,11 +12,11 @@ import (
 func RequestResponseLogMiddleWare(c *fiber.Ctx) error {
 	logger.Set(c)
 
-	correlationId := c.GetRespHeader(string(constant.CORRELATION_ID))
-	if correlationId == "" {
-		correlationId = uuid.New().String()
-		fmt.Printf("new correlationId : %v\n", correlationId)
-		c.Request().Header.Add(string(constant.CORRELATION_ID), correlationId)
+	correlationId := c.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
+	if correlationId == nil {
+		newCorrelationId := uuid.New().String()
+		fmt.Printf("new correlationId : %v\n", newCorrelationId)
+		c.Request().Header.Add(string(constant.CORRELATION_ID), newCorrelationId)
 	}
 
 	log := logger.Get(c)
