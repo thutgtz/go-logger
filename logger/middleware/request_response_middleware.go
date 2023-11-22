@@ -19,6 +19,7 @@ func RequestResponseLogMiddleWare(c *fiber.Ctx) error {
 		correlationId = uuid.New().String()
 		c.Request().Header.Add(string(constant.CORRELATION_ID), correlationId)
 	}
+
 	log := logger.Get(c)
 
 	err := c.Next()
