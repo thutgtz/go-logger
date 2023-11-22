@@ -16,7 +16,7 @@ func main() {
 	logger.Set(c)
 	header := map[string]string{}
 	// header["sss"] = "sss"
-	h := http.NewHttpWrapper("http://localhost:8080")
+	h := http.NewHttpWrapper("http://localhost:8000")
 	resp, _ := h.Get(c, string("/api/v2/simple"), header, 10)
 	fmt.Println(resp)
 }

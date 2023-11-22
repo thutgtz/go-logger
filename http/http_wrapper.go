@@ -40,16 +40,15 @@ func (h *httpWrapperImpl) httpRequest(method string, ctx *fiber.Ctx, path string
 	request, errReq := http.NewRequest(method, h.baseUrl+path, bytes.NewBuffer(body))
 	request.Header.Set("content-type", "application/json")
 	if errReq != nil {
+		l.Error(errReq.Error())
 		return nil, errReq
 	}
 
 	reqTime := time.Now()
 	response, errResp := client.Do(request)
-	logInfo := h.logResponseInfo(ctx, reqTime, method, path, h.baseUrl+path, header, body, response)
-
-	l.LogApi(logInfo)
 
 	if errResp != nil {
+		l.Error(errResp.Error())
 		return nil, errResp
 	}
 	defer response.Body.Close()
@@ -57,6 +56,8 @@ func (h *httpWrapperImpl) httpRequest(method string, ctx *fiber.Ctx, path string
 	var result map[string]interface{}
 	json.NewDecoder(response.Body).Decode(&result)
 
+	logInfo := h.logResponseInfo(ctx, reqTime, method, path, h.baseUrl+path, header, body, response)
+	l.LogApi(logInfo)
 	return result, nil
 }
 
