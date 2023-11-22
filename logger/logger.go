@@ -56,7 +56,7 @@ func (l *LoggerImpl) LogApi(logReq loggerModel.RequestLogModel) {
 
 func (l *LoggerImpl) LogResponse() {
 	userId := l.ctx.Request().Header.Peek(string(constant.USER_ID))
-	correlationId := l.ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
+	correlationId := l.ctx.Request().Header.Peek(string(constant.CORRELATION_ID))
 
 	resp := model.ResponseModel[interface{}]{}
 	json.Unmarshal(l.ctx.Response().Body(), &resp)
@@ -85,7 +85,7 @@ func (l *LoggerImpl) LogResponse() {
 
 func (l *LoggerImpl) ApiLogMetaData() loggerModel.ApiLogModel {
 	userId := l.ctx.Request().Header.Peek(string(constant.USER_ID))
-	correlationId := l.ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
+	correlationId := l.ctx.Request().Header.Peek(string(constant.CORRELATION_ID))
 
 	return loggerModel.ApiLogModel{
 		LogType:       constant.API_LOG,
