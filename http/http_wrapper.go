@@ -73,7 +73,7 @@ func (h *httpWrapperImpl) logResponseInfo(
 	resp *http.Response,
 ) model.RequestLogModel {
 	userId := ctx.Request().Header.Peek(string(constant.USER_ID))
-	correlationId := ctx.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
+	correlationId := ctx.Request().Header.Peek(string(constant.CORRELATION_ID))
 
 	responseModel := responseModel.ResponseModel[interface{}]{}
 	json.Unmarshal(body, &responseModel)
