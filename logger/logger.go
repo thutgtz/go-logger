@@ -8,13 +8,12 @@ import (
 	"github.com/thutgtz/go-logger/logger/constant"
 
 	"github.com/gofiber/fiber/v2"
-	"github.com/google/uuid"
 
 	"github.com/thutgtz/go-logger/logger/model"
 )
 
 type Logger interface {
-	LogRequest(reqTime time.Time)
+	LogExternalApi(logReq model.RequestLogModel)
 	LogResponse(reqTime time.Time)
 	Info(message string)
 	Error(message string)
@@ -44,26 +43,7 @@ func newLoggerImpl(ctx *fiber.Ctx) Logger {
 	}
 }
 
-func (l *LoggerImpl) LogRequest(reqTime time.Time) {
-	userId := l.ctx.GetRespHeader(string(constant.USER_ID))
-	correlationId := l.ctx.GetRespHeader(string(constant.CORRELATION_ID))
-	if correlationId == "" {
-		correlationId = uuid.New().String()
-	}
-
-	logReq := model.RequestLogModel{
-		LogType:       constant.REQUEST_LOG,
-		IpAddress:     l.ctx.IP(),
-		CorrelationId: correlationId,
-		UserId:        userId,
-		Method:        l.ctx.Method(),
-		Uri:           l.ctx.Path(),
-		RawUri:        l.ctx.BaseURL() + l.ctx.Path() + l.ctx.Context().QueryArgs().String(),
-		ReqHeader:     string(l.ctx.Request().Header.RawHeaders()),
-		ReqBody:       string(l.ctx.BodyRaw()),
-		ReqTime:       reqTime.Format(time.RFC3339),
-	}
-
+func (l *LoggerImpl) LogExternalApi(logReq model.RequestLogModel) {
 	info(
 		"request",
 		convertStructToLogField[model.RequestLogModel](logReq)...,
@@ -83,6 +63,12 @@ func (l *LoggerImpl) LogResponse(reqTime time.Time) {
 		IpAddress:      l.ctx.IP(),
 		CorrelationId:  correlationId,
 		UserId:         userId,
+		Method:         l.ctx.Method(),
+		Uri:            l.ctx.Path(),
+		RawUri:         l.ctx.BaseURL() + l.ctx.Path() + l.ctx.Context().QueryArgs().String(),
+		ReqHeader:      string(l.ctx.Request().Header.RawHeaders()),
+		ReqBody:        string(l.ctx.BodyRaw()),
+		ReqTime:        reqTime.Format(time.RFC3339),
 		RespBody:       string(l.ctx.Response().Body()),
 		RespHttpStatus: fmt.Sprint(l.ctx.Response().StatusCode()),
 		RespStatus:     fmt.Sprint(resp.Status.Code),

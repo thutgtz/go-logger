@@ -14,6 +14,8 @@ import (
 type HttpWrapper interface {
 	Get(ctx *fiber.Ctx, path string, header map[string]string, timeOutInSecond time.Duration) (map[string]interface{}, error)
 	Post(ctx *fiber.Ctx, path string, header map[string]string, body interface{}, timeOutInSecond time.Duration) (map[string]interface{}, error)
+	Put(ctx *fiber.Ctx, path string, header map[string]string, body interface{}, timeOutInSecond time.Duration) (map[string]interface{}, error)
+	Patch(ctx *fiber.Ctx, path string, header map[string]string, body interface{}, timeOutInSecond time.Duration) (map[string]interface{}, error)
 }
 
 type httpWrapperImpl struct {
@@ -61,4 +63,20 @@ func (h *httpWrapperImpl) Post(ctx *fiber.Ctx, path string, header map[string]st
 		return nil, err
 	}
 	return h.httpRequest(http.MethodPost, ctx, path, nil, requstBody, timeOutInSecond)
+}
+
+func (h *httpWrapperImpl) Put(ctx *fiber.Ctx, path string, header map[string]string, body interface{}, timeOutInSecond time.Duration) (map[string]interface{}, error) {
+	requstBody, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	return h.httpRequest(http.MethodPut, ctx, path, nil, requstBody, timeOutInSecond)
+}
+
+func (h *httpWrapperImpl) Patch(ctx *fiber.Ctx, path string, header map[string]string, body interface{}, timeOutInSecond time.Duration) (map[string]interface{}, error) {
+	requstBody, err := json.Marshal(body)
+	if err != nil {
+		return nil, err
+	}
+	return h.httpRequest(http.MethodPatch, ctx, path, nil, requstBody, timeOutInSecond)
 }
