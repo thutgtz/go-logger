@@ -31,7 +31,6 @@ func NewHttpWrapper(baseUrl string) HttpWrapper {
 
 func (h *httpWrapperImpl) httpRequest(method string, ctx *fiber.Ctx, path string, header map[string]string, body []byte, timeOutInSecond time.Duration) (map[string]interface{}, error) {
 	l := logger.Get(ctx)
-	l.Info(path)
 
 	defaultTimeout := time.Duration(timeOutInSecond * time.Second)
 	client := &http.Client{
