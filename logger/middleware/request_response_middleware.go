@@ -15,7 +15,7 @@ func RequestResponseLogMiddleWare(c *fiber.Ctx) error {
 	correlationId := c.Request().Header.Peek(string(constant.ACCEPT_LANGUAGE))
 	if correlationId == nil {
 		newCorrelationId := uuid.New().String()
-		fmt.Printf("new correlationId : %v\n", newCorrelationId)
+		fmt.Printf("New correlationId : %v\n", newCorrelationId)
 		c.Request().Header.Add(string(constant.CORRELATION_ID), newCorrelationId)
 	}
 
